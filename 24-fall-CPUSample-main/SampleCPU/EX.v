@@ -1,3 +1,4 @@
+// 执行指令
 `include "lib/defines.vh"
 module EX(
     input wire clk,
@@ -8,6 +9,12 @@ module EX(
     input wire [`ID_TO_EX_WD-1:0] id_to_ex_bus,
 
     output wire [`EX_TO_MEM_WD-1:0] ex_to_mem_bus,
+
+
+    // 我的
+    output wire [37:0] ex_to_id_bus,
+    //
+    
 
     output wire data_sram_en,
     output wire [3:0] data_sram_wen,
@@ -38,6 +45,7 @@ module EX(
     wire [3:0] sel_alu_src2;
     wire data_ram_en;
     wire [3:0] data_ram_wen;
+    wire [3:0] data_ram_read;
     wire rf_we;
     wire [4:0] rf_waddr;
     wire sel_rf_res;
@@ -56,7 +64,10 @@ module EX(
         rf_waddr,       // 69:65
         sel_rf_res,     // 64
         rf_rdata1,         // 63:32
-        rf_rdata2          // 31:0
+        rf_rdata2,          // 31:0
+
+
+        data_ram_read
     } = id_to_ex_bus_r;
 
     wire [31:0] imm_sign_extend, imm_zero_extend, sa_zero_extend;
@@ -83,6 +94,14 @@ module EX(
 
     assign ex_result = alu_result;
 
+
+
+
+
+
+
+
+
     assign ex_to_mem_bus = {
         ex_pc,          // 75:44
         data_ram_en,    // 43
@@ -92,6 +111,16 @@ module EX(
         rf_waddr,       // 36:32
         ex_result       // 31:0
     };
+
+    assign ex_to_id_bus = {
+        rf_we,          // 37 寄存器文件写能信号
+        rf_waddr,       // 36:32 寄存器文件写地址
+        ex_result       // 31:0
+    };
+
+
+
+
 
     // MUL part
     wire [63:0] mul_result;
@@ -111,7 +140,9 @@ module EX(
     wire inst_div, inst_divu;
     wire div_ready_i;
     reg stallreq_for_div;
+
     assign stallreq_for_ex = stallreq_for_div;
+
 
     reg [31:0] div_opdata1_o;
     reg [31:0] div_opdata2_o;

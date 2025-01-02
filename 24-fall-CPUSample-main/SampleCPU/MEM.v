@@ -1,3 +1,4 @@
+// 访存
 `include "lib/defines.vh"
 module MEM(
     input wire clk,
@@ -8,7 +9,10 @@ module MEM(
     input wire [`EX_TO_MEM_WD-1:0] ex_to_mem_bus,
     input wire [31:0] data_sram_rdata,
 
-    output wire [`MEM_TO_WB_WD-1:0] mem_to_wb_bus
+    output wire [`MEM_TO_WB_WD-1:0] mem_to_wb_bus,
+
+
+    output wire [37:0] mem_to_id_bus
 );
 
     reg [`EX_TO_MEM_WD-1:0] ex_to_mem_bus_r;
@@ -31,6 +35,7 @@ module MEM(
     wire [31:0] mem_pc;
     wire data_ram_en;
     wire [3:0] data_ram_wen;
+    wire [3:0] data_ram_read;
     wire sel_rf_res;
     wire rf_we;
     wire [4:0] rf_waddr;
@@ -45,10 +50,12 @@ module MEM(
         sel_rf_res,     // 38
         rf_we,          // 37
         rf_waddr,       // 36:32
-        ex_result       // 31:0
+        ex_result,       // 31:0
+        data_ram_read  // 38:35
     } =  ex_to_mem_bus_r;
 
 
+    
 
     assign rf_wdata = sel_rf_res ? mem_result : ex_result;
 
@@ -59,6 +66,12 @@ module MEM(
         rf_wdata    // 31:0
     };
 
+
+    assign mem_to_id_bus = {
+        rf_we,      // 37  
+        rf_waddr,   // 36:32
+        rf_wdata    // 31:0
+    };
 
 
 
