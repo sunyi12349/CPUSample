@@ -1,0 +1,104 @@
+bfc00704:	0ff01440 	jal	bfc05100 <n1_lui_test>@逻辑运算3：寄存器高半部分置立即数
+bfc00724:	0ff17638 	jal	bfc5d8e0 <n2_addu_test>算术运算3：加，不产生溢出例外
+bfc00734:	0ff22494 	jal	bfc89250 <n3_addiu_test>@算术运算4：加立即数，不产生溢出例外
+bfc00744:	0ff0e9e8 	jal	bfc3a7a0 <n4_beq_test>@ 分支跳转指令1：相等转移
+bfc00754:	0ff08de4 	jal	bfc23790 <n5_bne_test>分支跳转指令2：不等转移
+bfc00764:	0ff1257c 	jal	bfc495f0 <n6_lw_test>访存指令5：取字
+bfc00774:	0ff1a824 	jal	bfc6a090 <n7_or_test>逻辑运算5：按位或
+bfc00784:	0ff13f90 	jal	bfc4fe40 <n8_slt_test>算术运算7：有符号小于设置 1
+bfc00794:	0ff00d58 	jal	bfc03560 <n9_slti_test>算术运算8：有符号小于立即数设置 1
+bfc007a4:	0ff0f59c 	jal	bfc3d670 <n10_sltiu_test>算术运算10：无符号小于立即数设置 1
+bfc007b4:	0ff1bac8 	jal	bfc6eb20 <n11_sll_test>移位运算1：立即数逻辑左移
+bfc007c4:	0ff00610 	jal	bfc01840 <n12_sw_test>访存指令8：存字
+bfc007d4:	0ff0fc84 	jal	bfc3f210 <n13_j_test>分支跳转指令9：无条件直接跳转
+bfc007e4:	0ff18e08 	jal	bfc63820 <n14_jal_test>分支跳转指令10：无条件直接跳转至子程序并保存返回地址
+bfc007f4:	0ff20e8c 	jal	bfc83a30 <n15_jr_test>分支跳转指令11：无条件寄存器跳转
+bfc00804:	0ff1e7d8 	jal	bfc79f60 <n16_beq_ds_test>
+bfc00814:	0ff2050c 	jal	bfc81430 <n17_bne_ds_test>
+bfc00824:	0ff0e69c 	jal	bfc39a70 <n18_j_ds_test>
+bfc00834:	0ff0db68 	jal	bfc36da0 <n19_jal_ds_test>
+bfc00844:	0ff21f3c 	jal	bfc87cf0 <n20_jr_ds_test>
+bfc00854:	0ff1fca0 	jal	bfc7f280 <n21_add_test>算术运算1：加，产生溢出例外
+bfc00864:	0ff029ac 	jal	bfc0a6b0 <n22_addi_test>算术运算2：加立即数，产生溢出例外
+bfc00874:	0ff0ca0c 	jal	bfc32830 <n23_sub_test>算术运算5：减，产生溢出例外
+bfc00884:	0ff183d0 	jal	bfc60f40 <n24_subu_test>算术运算6：减，不产生溢出例外
+bfc00894:	0ff1e9dc 	jal	bfc7a770 <n25_sltu_test>算术运算9：无符号小于设置 1
+bfc008a4:	0ff132f4 	jal	bfc4cbd0 <n26_and_test>逻辑运算1：按位与
+bfc008b4:	0ff1b3e0 	jal	bfc6cf80 <n27_andi_test>逻辑运算2：立即数按位与
+bfc008c4:	0ff227f4 	jal	bfc89fd0 <n28_nor_test>逻辑运算4：按位或非
+bfc008d4:	0ff1dff8 	jal	bfc77fe0 <n29_ori_test>@逻辑运算6：立即数按位或
+bfc008e4:	0ff11b44 	jal	bfc46d10 <n30_xor_test>逻辑运算7：按位异或
+bfc008f4:	0ff0210c 	jal	bfc08430 <n31_xori_test>逻辑运算8：立即数按位异或
+bfc00904:	0ff1d76c 	jal	bfc75db0 <n32_sllv_test>移位运算2：变量逻辑左移
+bfc00914:	0ff108d8 	jal	bfc42360 <n33_sra_test>移位运算3：立即数算术右移
+bfc00924:	0ff0324c 	jal	bfc0c930 <n34_srav_test>移位运算4：变量算术右移
+bfc00934:	0ff018d8 	jal	bfc06360 <n35_srl_test>移位运算5：立即数逻辑右移
+bfc00944:	0ff16cd0 	jal	bfc5b340 <n36_srlv_test>移位运算6：变量逻辑右移
+bfc00954:	0ff157a0 	jal	bfc55e80 <n37_bgez_test>分支跳转指令3：大于等于 0 转移
+bfc00964:	0ff077f8 	jal	bfc1dfe0 <n38_bgtz_test>分支跳转指令4：大于 0 转移
+bfc00974:	0ff1c238 	jal	bfc708e0 <n39_blez_test>分支跳转指令5：小于等于 0 转移
+bfc00984:	0ff1489c 	jal	bfc52270 <n40_bltz_test>分支跳转指令6：小于 0 转移
+bfc00994:	0ff0a2bc 	jal	bfc28af0 <n41_bltzal_test>分支跳转指令7：小于 0 调用子程序并保存返回地址
+bfc009a4:	0ff06120 	jal	bfc18480 <n42_bgezal_test>分支跳转指令8：大于等于 0 调用子程序并保存返回地址
+bfc009b4:	0ff044a8 	jal	bfc112a0 <n43_jalr_test>分支跳转指令12：无条件寄存器跳转至子程序并保存返回地址下
+bfc009c4:	0ff1f5f0 	jal	bfc7d7c0 <n44_div_test>算术运算11：有符号字除
+bfc009d4:	0ff03af0 	jal	bfc0ebc0 <n45_divu_test>算术运算12：无符号字除
+bfc009e4:	0ff0d24c 	jal	bfc34930 <n46_mult_test>算术运算13：有符号字乘
+bfc009f4:	0ff20650 	jal	bfc81940 <n47_multu_test>算术运算14：无符号字乘
+bfc00a04:	0ff220f4 	jal	bfc883d0 <n48_mfhi_test>分支跳转指令13：HI 寄存器至通用寄存器
+bfc00a14:	0ff05d80 	jal	bfc17600 <n49_mflo_test>分支跳转指令14：LO 寄存器至通用寄存器
+bfc00a24:	0ff18070 	jal	bfc601c0 <n50_mthi_test>分支跳转指令15：通用寄存器至HI 寄存器
+bfc00a34:	0ff0a014 	jal	bfc28050 <n51_mtlo_test>分支跳转指令16：通用寄存器至LO 寄存器
+bfc00a44:	0ff00bb0 	jal	bfc02ec0 <n52_bgez_ds_test>
+bfc00a54:	0ff00368 	jal	bfc00da0 <n53_bgtz_ds_test>
+bfc00a64:	0ff2322c 	jal	bfc8c8b0 <n54_blez_ds_test>
+bfc00a74:	0ff1f408 	jal	bfc7d020 <n55_bltz_ds_test>
+bfc00a84:	0ff05a94 	jal	bfc16a50 <n56_bltzal_ds_test>
+bfc00a94:	0ff0e800 	jal	bfc3a000 <n57_bgezal_ds_test>
+bfc00aa4:	0ff13d50 	jal	bfc4f540 <n58_jalr_ds_test>
+bfc00ab4:	0ff0dc5c 	jal	bfc37170 <n59_lb_test>访存指令1：取字节有符号扩展
+bfc00ac4:	0ff19e48 	jal	bfc67920 <n60_lbu_test>访存指令2：取字节无符号扩展
+bfc00ad4:	0ff0b884 	jal	bfc2e210 <n61_lh_test>访存指令3：取半字有符号扩展
+bfc00ae4:	0ff12a7c 	jal	bfc4a9f0 <n62_lhu_test>访存指令4：取半字无符号扩展
+bfc00af4:	0ff11040 	jal	bfc44100 <n63_sb_test>访存指令6：存字节
+bfc00b04:	0ff0bf98 	jal	bfc2fe60 <n64_sh_test>访存指令7：存半字
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
