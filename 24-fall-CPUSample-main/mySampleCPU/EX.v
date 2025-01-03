@@ -218,7 +218,7 @@ module EX(
     //stallreq_for_ex修改过
     wire w_hi_we2;
     wire w_lo_we2;
-    assign stallreq_for_ex = (stallreq_for_div & div_ready_i==1'b0) | mul_signed;
+    assign stallreq_for_ex = (stallreq_for_div & div_ready_i==1'b0);
     //assign stallreq_for_ex = (stallreq_for_div & div_ready_i==1'b0) | (mul_begin & mul_ready_i==1'b0);
 
     //新添加的ready_ex_to_id为了使用inst_stall

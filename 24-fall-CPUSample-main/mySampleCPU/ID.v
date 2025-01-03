@@ -187,6 +187,11 @@ module ID(
 regfile u_regfile(
     // ？？？？？？？？？？？？？？
 
+    .inst   (inst   ),  
+
+
+
+
 
     .clk    (clk    ),            // 时钟信号，控制寄存器文件的同步操作
     .raddr1 (rs ),                // 将源寄存器 1 地址（rs）连接到寄存器文件模块的 raddr1 端口，用于读取第一个操作数

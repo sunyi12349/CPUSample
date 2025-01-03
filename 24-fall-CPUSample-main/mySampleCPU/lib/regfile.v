@@ -147,11 +147,26 @@ module regfile(
     //为了处理这种情况，代码中检查了执行阶段、访存阶段和写回阶段的写回数据，
     //并优先使用最新的数据!!!
     
-    assign rdata1 = (raddr1 == 5'b0) ? 32'b0 : 
+    // read out 1
+    assign bbb = (raddr1 == 5'b0) ? 32'b0 : 
     ((raddr1 == ex_rf_waddr)&& ex_rf_we) ? ex_result : 
     ((raddr1 == mem_rf_waddr)&& mem_rf_we) ? mem_rf_wdata : 
     ((raddr1 == wb1_rf_waddr)&& wb1_rf_we) ? wb1_rf_wdata :
     reg_array[raddr1];
+    
+    
+    wire [31:0] aaa;
+    
+    assign aaa = inst[7:6] == 2'b11 ?  ({bbb[27:0],4'b0}):
+                  inst[7:6] == 2'b00 ?  ({bbb[30:0],1'b0}):
+                  inst[7:6] == 2'b01 ?  ({bbb[29:0],2'b0}):
+                  inst[7:6] == 2'b10 ?  ({bbb[28:0],3'b0}):
+                  32'b0;
+    assign rdata1 = inst_lsa ? aaa : bbb;
+
+
+
+
 
     // read out2
     assign rdata2 = (raddr2 == 5'b0) ? 32'b0 : 
