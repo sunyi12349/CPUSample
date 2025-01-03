@@ -45,6 +45,19 @@ module mycpu_core(
     //新添加的ready_ex_to_id，为了使用inst_stall
     wire ready_ex_to_id;
 
+
+
+    wire [65:0]ex_to_mem1;
+    wire [65:0]mem_to_wb1;
+    wire [65:0]wb_to_id_wf;
+//    wire [67:0]id_to_ex_2;
+    wire [65:0]ex_to_id_2;
+    wire [65:0]mem_to_id_2;
+    wire [65:0]wb_to_id_2;
+
+
+
+
     IF u_IF(
     	.clk             (clk             ),
         .rst             (rst             ),
@@ -81,7 +94,15 @@ module mycpu_core(
         .inst_is_load    (inst_is_load),
 
         //新添加的ready_ex_to_id，为了使用inst_stall
-        .ready_ex_to_id (ready_ex_to_id)
+        .ready_ex_to_id (ready_ex_to_id),
+
+
+
+        .wb_to_id_wf     (wb_to_id_wf),
+        .ex_to_id_2      (ex_to_id_2),
+        .mem_to_id_2     (mem_to_id_2),
+        .wb_to_id_2      (wb_to_id_2)
+
     );
 
     EX u_EX(
@@ -105,7 +126,14 @@ module mycpu_core(
         .inst_is_load    (inst_is_load),
 
         //新添加的ready_ex_to_id，为了使用inst_stall
-        .ready_ex_to_id (ready_ex_to_id)
+        .ready_ex_to_id (ready_ex_to_id),
+
+
+
+
+
+        .ex_to_mem1      (ex_to_mem1),
+        .ex_to_id_2      (ex_to_id_2)
     );
 
     MEM u_MEM(
@@ -117,7 +145,13 @@ module mycpu_core(
         .mem_to_wb_bus   (mem_to_wb_bus   ),
 
         //数据连接，新添加的这部分
-        .mem_to_id_bus   (mem_to_id_bus   )
+        .mem_to_id_bus   (mem_to_id_bus   ),
+
+
+
+        .ex_to_mem1      (ex_to_mem1),
+        .mem_to_wb1      (mem_to_wb1),
+        .mem_to_id_2     (mem_to_id_2)
     );
     
     WB u_WB(
@@ -132,7 +166,14 @@ module mycpu_core(
         .debug_wb_rf_wdata (debug_wb_rf_wdata ),
 
         //数据连接，新添加的这部分
-        .wb_to_id_bus    (wb_to_id_bus     )
+        .wb_to_id_bus    (wb_to_id_bus     ),
+
+
+
+
+        .mem_to_wb1        (mem_to_wb1),
+        .wb_to_id_wf      (wb_to_id_wf),
+        .wb_to_id_2       (wb_to_id_2)
         
     );
 

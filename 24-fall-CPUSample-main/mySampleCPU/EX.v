@@ -33,7 +33,11 @@ module EX(
     output wire inst_is_load,
 
     //定义inst_stall需要用的
-    input wire ready_ex_to_id
+    input wire ready_ex_to_id,
+
+    output wire [65:0]ex_to_mem1,
+    output wire [65:0]ex_to_id_2
+
 );
 
     reg [`ID_TO_EX_WD-1:0] id_to_ex_bus_r;
@@ -68,6 +72,22 @@ module EX(
     wire [31:0] rf_rdata1, rf_rdata2;
     reg is_in_delayslot;
 
+    // lo_hi寄存器的读写
+    wire [1:0] lo_hi_r;
+    wire [1:0] lo_hi_w;
+    // 使能信号
+    wire w_hi_we;
+    wire w_lo_we;
+    wire w_hi_we3;
+    wire w_lo_we3;
+    wire [31:0] hi_i;
+    wire [31:0] lo_i;
+    wire[31:0] hi_o;
+    wire[31:0] lo_o;
+
+
+
+
     assign {
         ex_pc,          // 158:127
         inst,           // 126:95
@@ -81,8 +101,18 @@ module EX(
         sel_rf_res,     // 64
         rf_rdata1,         // 63:32
         rf_rdata2,          // 31:0
+
+        lo_hi_r,
+        lo_hi_w,
+        lo_o,
+        hi_o,
+
         data_ram_read
     } = id_to_ex_bus_r;
+
+    // 是否写入控制信号
+    assign w_lo_we3 = lo_hi_w[0]==1'b1 ? 1'b1:1'b0;
+    assign w_hi_we3 = lo_hi_w[1]==1'b1 ? 1'b1:1'b0;
 
     wire [31:0] imm_sign_extend, imm_zero_extend, sa_zero_extend;
     assign imm_sign_extend = {{16{inst[15]}},inst[15:0]};
@@ -106,7 +136,9 @@ module EX(
         .alu_result  (alu_result  )
     );
 
-    assign ex_result = alu_result;
+    assign ex_result = lo_hi_r[0] ? lo_o :
+                         lo_hi_r[1] ? hi_o :
+                         alu_result;
 
     assign data_sram_en = data_ram_en ;
     assign data_sram_wen = (data_ram_read==4'b0101 && ex_result[1:0] == 2'b00 )? 4'b0001: 
@@ -153,13 +185,28 @@ module EX(
     // MUL part
     wire [63:0] mul_result;
     wire mul_signed; // 有符号乘法标�?
+    wire w_hi_we1;
+    wire w_lo_we1;
+    wire mult;
+    wire multu;
+    assign mult = (inst[31:26] == 6'b00_0000) & (inst[15:6] == 10'b0000000000) & (inst[5:0] == 6'b01_1000);
+    assign multu= (inst[31:26] == 6'b00_0000) & (inst[15:6] == 10'b0000000000) & (inst[5:0] == 6'b01_1001);
+    assign w_hi_we1 = mult | multu ;
+    assign w_lo_we1 = mult | multu ;
+
+
+    wire [31:0] mul_1;
+    wire [31:0] mul_2;
+    assign mul_1 = w_hi_we1 ? alu_src1 : 32'b0;
+    assign mul_2 = w_hi_we1 ? alu_src2 : 32'b0;
+    assign mul_signed = mult | multu;
 
     mul u_mul(
     	.clk        (clk            ),
         .resetn     (~rst           ),
         .mul_signed (mul_signed     ),
-        .ina        (      ), // 乘法源操作数1
-        .inb        (      ), // 乘法源操作数2
+        .ina        (  mul_1    ), // 乘法源操作数1
+        .inb        (   mul_2   ), // 乘法源操作数2
         .result     (mul_result     ) // 乘法结果 64bit
     );
 
@@ -169,13 +216,27 @@ module EX(
     wire div_ready_i;
     reg stallreq_for_div;
     //stallreq_for_ex修改过
-    assign stallreq_for_ex = stallreq_for_div;
+    wire w_hi_we2;
+    wire w_lo_we2;
+    assign stallreq_for_ex = (stallreq_for_div & div_ready_i==1'b0) | mul_signed;
     //assign stallreq_for_ex = (stallreq_for_div & div_ready_i==1'b0) | (mul_begin & mul_ready_i==1'b0);
 
     //新添加的ready_ex_to_id为了使用inst_stall
     //assign ready_ex_to_id = div_ready_i | mul_ready_i;
     //mul_ready_i是mul_plus中的，目前未定义
+
+
+
+    ///????????????????????????????????????
     assign ready_ex_to_id = div_ready_i ;
+
+
+    assign inst_div = (inst[31:26] == 6'b00_0000) & (inst[15:6] == 10'b0000000000) & (inst[5:0] == 6'b01_1010);
+    assign inst_divu= (inst[31:26] == 6'b00_0000) & (inst[15:6] == 10'b0000000000) & (inst[5:0] == 6'b01_1011);
+    assign w_hi_we2 = inst_div | inst_divu;
+    assign w_lo_we2 = inst_div | inst_divu;
+
+
 
     reg [31:0] div_opdata1_o;
     reg [31:0] div_opdata2_o;
@@ -262,5 +323,28 @@ module EX(
     end
 
     // mul_result �? div_result 可以直接使用   
-    
+    assign lo_i = w_lo_we1 ? mul_result[31:0]:
+                   w_lo_we2 ?div_result[31:0]:
+                   w_lo_we3 ? rf_rdata1:
+                    32'b0;
+    assign hi_i = w_hi_we1 ? mul_result[63:32]:
+                   w_hi_we2 ? div_result[63:32]:
+                   w_hi_we3 ? rf_rdata1:
+                    32'b0;
+    assign w_hi_we = w_hi_we1 | w_hi_we2 | w_hi_we3;
+    assign w_lo_we = w_lo_we1 | w_lo_we2 | w_lo_we3;
+        assign ex_to_mem1 =
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    };
+    assign ex_to_id_2=
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    };
 endmodule

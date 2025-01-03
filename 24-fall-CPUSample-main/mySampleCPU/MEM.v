@@ -11,23 +11,32 @@ module MEM(
     output wire [`MEM_TO_WB_WD-1:0] mem_to_wb_bus,
 
     //新添加的mem_to_id_bus
-    output wire [37:0] mem_to_id_bus
+    output wire [37:0] mem_to_id_bus,
+
+
+    input wire [65:0] ex_to_mem1,
+    output wire[65:0] mem_to_wb1,
+    output wire[65:0] mem_to_id_2 
 );
 
     reg [`EX_TO_MEM_WD-1:0] ex_to_mem_bus_r;
+    reg [65:0] ex_to_mem1_r;
 
     always @ (posedge clk) begin
         if (rst) begin
             ex_to_mem_bus_r <= `EX_TO_MEM_WD'b0;
+            ex_to_mem1_r <= 66'b0;
         end
         // else if (flush) begin
         //     ex_to_mem_bus_r <= `EX_TO_MEM_WD'b0;
         // end
         else if (stall[3]==`Stop && stall[4]==`NoStop) begin
             ex_to_mem_bus_r <= `EX_TO_MEM_WD'b0;
+            ex_to_mem1_r <= 65'b0;
         end
         else if (stall[3]==`NoStop) begin
             ex_to_mem_bus_r <= ex_to_mem_bus;
+            ex_to_mem1_r <= ex_to_mem1;
         end
     end
 
@@ -44,6 +53,15 @@ module MEM(
     wire [31:0] ex_result;
     wire [31:0] mem_result;
 
+
+
+
+    wire w_hi_we;
+    wire w_lo_we;
+    wire [31:0]hi_i;
+    wire [31:0]lo_i;
+
+
     assign {
         mem_pc,         // 75:44
         data_ram_en,    // 43
@@ -54,6 +72,34 @@ module MEM(
         ex_result,      // 31:0
         data_ram_read
     } =  ex_to_mem_bus_r;
+
+
+
+
+    assign 
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    }=ex_to_mem1_r ;
+    
+    assign mem_to_wb1 =
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    };
+    
+    assign mem_to_id_2 =
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    };
+
 
 
 

@@ -17,6 +17,12 @@ module ID(
     input wire [37:0] wb_to_id_bus,
 
 
+    // 高低位寄存器相关指令
+    input wire [65:0] ex_to_id_2,
+    input wire[65:0] mem_to_id_2, 
+    input wire[65:0] wb_to_id_2, 
+
+
     input wire [`IF_TO_ID_WD-1:0] if_to_id_bus,// 从IF阶段传递到ID阶段的总线
 
     input wire [31:0] inst_sram_rdata, // 从指令SRAM读取的指令数据, 从 inst_sram_rdata 中读取指令，并对指令进行译码，生成控制信号和数据信号。
@@ -29,6 +35,10 @@ module ID(
 
     //定义stallreq_for_id需要用的
     input wire inst_is_load,
+
+    // WB 写回 id 的高低位信号(寄存器)
+    input wire [65:0] wb_to_id_wf,
+
 
     //定义inst_stall需要用的
     input wire ready_ex_to_id
@@ -145,25 +155,69 @@ module ID(
 
     wire [31:0] rdata1, rdata2;//读取的数据，分别对应 rs 和 rt 的值
 
+    // write
+    wire w_hi_we;//高位寄存器的写使能信号（1 位）
+    wire w_lo_we;//低位寄存器的写使能信号（1 位）
+    wire [31:0]hi_i;//写入寄存器数据
+    wire [31:0]lo_i;
+    // read
+    wire r_hi_we;//高位寄存器的读使能信号（1 位）
+    wire r_lo_we;//低位寄存器的读使能信号（1 位）
+    wire [31:0]hi_o;//读取寄存器数据 
+    wire [31:0]lo_o; 
+
+
+    wire [1:0] lo_hi_r;
+    wire [1:0] lo_hi_w;
+
+
+    wire inst_lsa;//对高低位寄存器加载或存储的控制
+
+    //打包寄存器写能信号yu数据
+    assign 
+    {
+        w_hi_we,
+        w_lo_we,
+        hi_i,
+        lo_i
+    } = wb_to_id_wf;
+
     //寄存器文件模块实例化，
     //相当于一个独立于其他模块的数据备份模块，方便对信号和数据进行传递
-    regfile u_regfile(
-    	.clk    (clk    ),
-        //将源寄存器 1 地址 rs 连接到寄存器文件模块的 raddr1 端口
-        .raddr1 (rs ),
-        .rdata1 (rdata1 ),
-        //将源寄存器 2 地址 rt 连接到寄存器文件模块的 raddr2 端口
-        .raddr2 (rt ),
-        .rdata2 (rdata2 ),
-        .we     (wb_rf_we     ),
-        .waddr  (wb_rf_waddr  ),
-        .wdata  (wb_rf_wdata  ),
+regfile u_regfile(
+    // ？？？？？？？？？？？？？？
 
-        //添加三个数据通路信号信息
-        .ex_to_id_bus(ex_to_id_bus),
-        .mem_to_id_bus(mem_to_id_bus),
-        .wb_to_id_bus(wb_to_id_bus)
-    );
+
+    .clk    (clk    ),            // 时钟信号，控制寄存器文件的同步操作
+    .raddr1 (rs ),                // 将源寄存器 1 地址（rs）连接到寄存器文件模块的 raddr1 端口，用于读取第一个操作数
+    .rdata1 (rdata1 ),            // 寄存器文件模块将第一个寄存器的值通过 rdata1 传输到外部
+    .raddr2 (rt ),                // 将源寄存器 2 地址（rt）连接到寄存器文件模块的 raddr2 端口，用于读取第二个操作数
+    .rdata2 (rdata2 ),            // 寄存器文件模块将第二个寄存器的值通过 rdata2 传输到外部
+    .we     (wb_rf_we     ),      // 写使能信号，控制是否写数据到寄存器文件
+    .waddr  (wb_rf_waddr  ),      // 写入寄存器的地址，指定写入数据的寄存器的地址
+    .wdata  (wb_rf_wdata  ),      // 要写入的数据，指定要写入寄存器的数据
+    // 添加三个数据通路信号
+    .ex_to_id_bus(ex_to_id_bus),  // 来自执行阶段（EX）的数据到 ID 阶段的信号
+    .mem_to_id_bus(mem_to_id_bus),// 来自内存阶段（MEM）的数据到 ID 阶段的信号
+    .wb_to_id_bus(wb_to_id_bus),  // 来自写回阶段（WB）的数据到 ID 阶段的信号
+    // 添加高低位寄存器相关
+    .ex_to_id_2(ex_to_id_2),      // 执行阶段（EX）到 ID 阶段的高低位寄存器信号
+    .mem_to_id_2(mem_to_id_2),    // 内存阶段（MEM）到 ID 阶段的高低位寄存器信号
+    .wb_to_id_2(wb_to_id_2),      // 写回阶段（WB）到 ID 阶段的高低位寄存器信号
+    // 高低位寄存器写操作
+    .w_hi_we(w_hi_we),            // 高位写使能信号
+    .w_lo_we(w_lo_we),            // 低位写使能信号
+    .hi_i(hi_i),                  // 写入到高位寄存器的数据
+    .lo_i(lo_i),                  // 写入到低位寄存器的数据
+    // 高低位寄存器读操作
+    .r_hi_we(lo_hi_r[0]),         // 从高位寄存器读取的写使能信号（通过 lo_hi_r[0] 控制是否从 lo 寄存器读取）
+    .r_lo_we(lo_hi_r[1]),         // 从低位寄存器读取的写使能信号（通过 lo_hi_r[1] 控制是否从 hi 寄存器读取）
+    .hi_o(hi_o),                  // 从高位寄存器输出的数据
+    .lo_o(lo_o),                  // 从低位寄存器输出的数据
+    // 是否加载高位或低位寄存器的数据
+    .inst_lsa(inst_lsa)           // 用于指示当前指令是否需要操作高低位寄存器的标志
+);
+
 
     //这些 assign 语句从指令 inst 中提取不同的字段，用于后续的译码和控制信号生成
     assign opcode = inst[31:26];
@@ -320,6 +374,12 @@ module ID(
     //如果为 1，表示 ALU 的第二个操作数来自立即数的零扩展值
     //当指令是 OR 立即数指令（inst_ori）时，sel_alu_src2[3] 为 1
     assign sel_alu_src2[3] = inst_ori | inst_andi | inst_xori;
+
+    // 低位寄存器到目标
+    assign lo_hi_r[0] = inst_mflo;
+
+    // 高位寄存器到目标
+    assign lo_hi_r[1] = inst_mfhi;
    
 
     // 生成 ALU（算术逻辑单元）的操作控制信号 alu_op
@@ -389,6 +449,11 @@ module ID(
     //sel_rf_dst[2]：选择 31 号寄存器（通常是返回地址寄存器）作为写地址
     assign sel_rf_dst[2] = inst_jal | inst_bgezal | inst_bltzal ;
 
+    //low和high的写入信号
+    assign lo_hi_w[0] = inst_mtlo;
+    assign lo_hi_w[1] = inst_mthi;
+
+
     //写地址生成
     // sel for regfile address
     //rf_waddr ：寄存器文件的写地址，表示结果将写入哪个寄存器
@@ -425,6 +490,13 @@ module ID(
         //reg_array[wdata1]装的是不同的内容，一个是指令中rs的值，一个是wb计算结果的值
         rdata1,         // 63:32//从寄存器文件读取的第一个数据,传的应该是指令中的rs
         rdata2,          // 31:0//从寄存器文件读取的第二个数据,传的应该是指令中的rt
+
+        // 高低位寄存器读写
+        lo_hi_r,
+        lo_hi_w,
+        lo_o,
+        hi_o,
+
         data_ram_read
     };
 
