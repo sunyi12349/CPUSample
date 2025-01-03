@@ -135,6 +135,8 @@ module ID(
 
     wire data_ram_en;//数据存储器的使能信号（1 位）
     wire [3:0] data_ram_wen;//数据存储器的写使能信号（4 位），用于控制字节写入
+
+    wire [3:0] data_ram_read;
     
     wire rf_we;//寄存器文件的写使能信号（1 位）
     wire [4:0] rf_waddr;//寄存器文件的写地址（5 位）
@@ -345,11 +347,22 @@ module ID(
     //生成数据存储器和寄存器文件的控制信号
     // load and store enable
     //这里固定为 0，表示当前指令不涉及数据存储器的读写操作
-   assign data_ram_en = inst_lw | inst_sw | inst_lb | inst_lbu | inst_lh | inst_lhu | inst_sb | inst_sh;
+    assign data_ram_en = inst_lw | inst_sw | inst_lb | inst_lbu | inst_lh | inst_lhu | inst_sb | inst_sh;
 
     // write enable
     //这里固定为 0，表示当前指令不涉及数据存储器的读写操作
     assign data_ram_wen = inst_sw ? 4'b1111 : 4'b0000;
+
+    assign data_ram_read    =  inst_lw  ? 4'b1111 :
+                               inst_lb  ? 4'b0001 :
+                               inst_lbu ? 4'b0010 :
+                               inst_lh  ? 4'b0011 :
+                               inst_lhu ? 4'b0100 :
+                               inst_sb  ? 4'b0101 :
+                               inst_sh  ? 4'b0111 :
+                               4'b0000;
+    
+
 
     // regfile store enable
     //如果当前指令是 OR 立即数指令（inst_ori）、加载高位立即数指令（inst_lui）或无符号加立即数指令（inst_addiu），
@@ -411,7 +424,8 @@ module ID(
         //答：在regfile中，读写操作是独立的，reg_array[rdata1]和
         //reg_array[wdata1]装的是不同的内容，一个是指令中rs的值，一个是wb计算结果的值
         rdata1,         // 63:32//从寄存器文件读取的第一个数据,传的应该是指令中的rs
-        rdata2          // 31:0//从寄存器文件读取的第二个数据,传的应该是指令中的rt
+        rdata2,          // 31:0//从寄存器文件读取的第二个数据,传的应该是指令中的rt
+        data_ram_read
     };
 
 
