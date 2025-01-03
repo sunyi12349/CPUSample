@@ -199,7 +199,7 @@ module EX(
     wire [31:0] mul_2;
     assign mul_1 = w_hi_we1 ? alu_src1 : 32'b0;
     assign mul_2 = w_hi_we1 ? alu_src2 : 32'b0;
-    assign mul_signed = mult | multu;
+    assign mul_signed = mult;
 
     mul u_mul(
     	.clk        (clk            ),
