@@ -1,0 +1,32 @@
+1. ex_to_id,mem_to_id,wb_to_id 数据通路连线，使用ex_to_id_bus解决了第一个报错
+
+
+2. 添加了两个stall信号（id相关和ex相关），stallreq_for_ex和stallreq_for_id，为了使用stallreq_for_id，还需要在id和ex和mycpu_core中添加inst_is_load
+
+3. 又添加了一个stall信号（inst_stall），主要在id修改的，为了使用inst_stall，又在id，ex，mycpu_core中添加了ready_ex_to_id 
+
+
+4. 添加addu，subu，jr，jal这四个指令后，过第二个报错
+
+
+5. 再添加除了hi和lo指令之外的其他指令在id段，可以到达n1测试中间位置，14000ns左右
+
+
+6. 再添加data_ram_read相关的id，ex，mem段数据相关通路，可过point43
+
+
+7. 在id，ex，mem，wb添加与hi，lo寄存器相关定义和数据通路（这部分改的比较多，hi lo应用在三种地方：mul，div，数据迁移），通过45
+
+
+8. 修改regfile.v中rdata1的取值情况，通过46，但死循环了
+
+9. 修改乘法器符号判断bug，并添加了移位，所有访存指令，通过64
+
+
+
+
+
+
+
+
+
