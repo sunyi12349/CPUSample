@@ -162,8 +162,8 @@ module regfile(
                   inst[7:6] == 2'b01 ?  ({bbb[29:0],2'b0}):
                   inst[7:6] == 2'b10 ?  ({bbb[28:0],3'b0}):
                   32'b0;
-    assign rdata1 = inst_lsa ? aaa : bbb;
-
+    //assign rdata1 = inst_lsa ? aaa : bbb;
+    assign rdata1 = bbb;
 
 
 
